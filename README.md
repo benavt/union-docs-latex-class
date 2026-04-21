@@ -51,9 +51,7 @@ latex-class/
 ├── union-doc.cls              <- the class file you will load
 ├── Font_Assets/               <- RPI Geist OTF fonts (required)
 ├── Commonly_Used_Logos/       <- PNG / JPG of official Union logos
-├── Subtitled_Logos/           <- logos with committee subtitles
-└── styles/                    <- parallel Typst / alternate-LaTeX styles
-                                  (you can ignore these)
+└── Subtitled_Logos/           <- logos with committee subtitles
 ```
 
 The `.cls` file exposes three relative asset paths, all of which default to
@@ -277,8 +275,8 @@ editing the class. Each one is a `\renewcommand`:
 
 ### 4.5 Reusable callouts and title blocks
 
-These two blocks are ported from `styles/latex/union-doc.sty` and reuse
-the same red/white `tcolorbox` palette as the cover page.
+These two blocks reuse the same red/white `tcolorbox` palette as the cover
+page.
 
 - `DocPanel` (environment) — a red-bordered call-out box for an
   editorial note, ratification stamp, or pull-quote:
@@ -362,7 +360,108 @@ identically to the underlying `\DocArticle`. If you are writing a new
 
 ---
 
-## 6. Troubleshooting
+## 6. Git conventions for Union documents
+
+When you commit changes to a Union governing document, write the commit message
+so someone reviewing the history can immediately tell **what changed** and
+**which final approval date the text corresponds to**.
+
+### Recommended commit format
+
+Use this pattern:
+
+```text
+<document name>: <short description> (final approval: YYYY-MM-DD)
+```
+
+Examples:
+
+- `Senate Bylaws: update election procedure language (final approval: 2026-04-21)`
+- `Union Constitution: incorporate approved amendment 3 (final approval: 2026-02-06)`
+- `Executive Board Rules: fix numbering and adopted wording (final approval: 2025-11-14)`
+
+Conventions to follow:
+
+- Use the **final approval date**, not the date you happened to make the edit.
+- Write the date in **ISO format**: `YYYY-MM-DD`.
+- Keep the subject line focused on the approved change itself, not on your
+  editing process. For example, prefer `incorporate approved budget language`
+  over `make edits from meeting`.
+- If a change has **not** received final approval yet, make that explicit in
+  the commit message instead of guessing a date. For example:
+  `Senate Bylaws: draft revisions for review (pending final approval)`.
+
+This convention makes it much easier to audit the repository later against
+minutes, ratification records, and released PDFs.
+
+## 7. Creating a release
+
+Create a release whenever you want to mark a specific snapshot of the class or
+document set as the version others should rely on.
+
+### Suggested release workflow
+
+1. Make sure the relevant document changes are committed, and that the commit
+   messages include the correct final approval date as described in §6.
+2. Rebuild the PDF(s) you expect people to use and confirm they render
+   correctly.
+3. If needed, update any version/date references in the source files so the
+   repository contents match the release you are about to publish. For example,
+   `union-doc.cls` currently declares itself with:
+
+   ```latex
+   \ProvidesClass{union-doc}[2026/04/21 Shared Union document class]
+   ```
+
+4. Create an annotated Git tag for the release:
+
+   ```bash
+   git tag -a <release-name> -m "Release <release-name>"
+   ```
+
+   Example:
+
+   ```bash
+   git tag -a 2026-04-21 -m "Release 2026-04-21"
+   ```
+
+5. Push the tag to the remote:
+
+   ```bash
+   git push origin <release-name>
+   ```
+
+6. On GitHub, open the repository's **Releases** page, create a new release
+   from that tag, and include a short summary of:
+   - which document(s) or class changes are included
+   - the final approval date(s)
+   - any files people should download or use
+
+### Choosing a release name
+
+There is no existing tag history in this repository yet, so choose one format
+and use it consistently. Two reasonable options are:
+
+- approval-date releases, such as `2026-04-21`
+- document-oriented releases, such as `constitution-2026-02-06`
+
+If this repository will hold releases for multiple Union documents, the
+document-oriented format is usually clearer.
+
+### Minimal command summary
+
+```bash
+git status
+git tag -a <release-name> -m "Release <release-name>"
+git push origin <release-name>
+```
+
+After that, finish the release notes in GitHub so users have a human-readable
+record of what changed.
+
+---
+
+## 8. Troubleshooting
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
@@ -375,7 +474,7 @@ identically to the underlying `\DocArticle`. If you are writing a new
 
 ---
 
-## 7. Where to look next
+## 9. Where to look next
 
 - Open `union-doc.cls` and read the top half of the file — the
   `\newcommand{\docXxx}{...}` lines correspond one-to-one with the table in
@@ -383,8 +482,4 @@ identically to the underlying `\DocArticle`. If you are writing a new
 - Open any real document (for example `../Union_Constitution/2026-02-06/main.tex`
   in the parent repository) to see a full, production example of the
   preamble and a reasonable set of overrides.
-- The `styles/` folder contains a matching Typst style (`union-style.typ`)
-  and a matching LaTeX *package* version (`union-doc.sty`) for projects that
-  cannot use a custom class. You will not need these for a plain `demo.tex`.
-
 Happy typesetting.
